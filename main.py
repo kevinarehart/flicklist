@@ -9,7 +9,7 @@ page_header = """
     <title>FlickList</title>
 </head>
 <body>
-    <h1>FlickList</h1>
+   <h1>FlickList</h1>
 """
 
 # html boilerplate for the bottom of every page
@@ -19,25 +19,25 @@ page_footer = """
 """
 
 class Index(webapp2.RequestHandler):
-    """ Handles requests coming in to '/' (the root of our site)
-        e.g. www.flicklist.com/
-    """
+   """ Handles requests coming in to '/' (the root of our site)
+       e.g. www.flicklist.com/
+   """
 
-    def get(self):
+   def get(self):
 
-        edit_header = "<h3>Edit My Watchlist</h3>"
+       edit_header = "<h3>Edit My Watchlist</h3>"
 
         # a form for adding new movies
-        add_form = """
-        <form action="/add" method="post">
-            <label>
-                I want to add
-                <input type="text" name="new-movie"/>
-                to my watchlist.
-            </label>
-            <input type="submit" value="Add It"/>
-        </form>
-        """
+       add_form = """
+       <form action="/add" method="post">
+           <label>
+               I want to add
+               <input type="text" name="new-movie"/>
+               to my watchlist.
+           </label>
+           <input type="submit" value="Add It"/>
+       </form>
+       """
 
         # TODO 1
         # Include another form so the user can "cross off" a movie from their list.
@@ -45,7 +45,7 @@ class Index(webapp2.RequestHandler):
        <form action="/add" method="post">
            <label>
                I want to remove
-               <input type="text" name="removed_movie"/>
+               <input type="text" name="removed-movie"/>
                to my watchlist.
            </label>
            <input type="submit" value="Remove It"/>
@@ -57,25 +57,29 @@ class Index(webapp2.RequestHandler):
         # text box (<input type="text"/>)
 
 
-        content = page_header + edit_header + add_form + remove_form + page_footer
-        self.response.write(content)
+       content = page_header + edit_header + add_form + remove_form + page_footer
+       self.response.write(content)
 
 
 class AddMovie(webapp2.RequestHandler):
-    """ Handles requests coming in to '/add'
-        e.g. www.flicklist.com/add
-    """
+   """ Handles requests coming in to '/add'
+       e.g. www.flicklist.com/add
+   """
 
-    def post(self):
+   def post(self):
         # look inside the request to figure out what the user typed
-        new_movie = self.request.get("new-movie")
+       new_movie = self.request.get("new-movie")
+       removed_movie = self.request.get("removed-movie")
 
         # build response content
-        new_movie_element = "<strong>" + new_movie + "</strong>"
-        sentence = new_movie_element + " has been added to your Watchlist!"
+       new_movie_element = "<strong>" + new_movie + "</strong>"
+       new_movie_sentence = new_movie_element + " has been added to your Watchlist!"
 
-        content = page_header + "<p>" + sentence + "</p>" + page_footer
-        self.response.write(content)
+       removed_movie_element = "<strong>" + removed_movie + "<strong>"
+       removed_movie_sentence = removed_movie_element + " has been removed from your Watchlist!"
+
+       content = page_header + "<p>" + new_movie_sentence + "</p>" + "<p>" + removed_movie_sentence + "</p>" + page_footer
+       self.response.write(content)
 
 
 # TODO 2
