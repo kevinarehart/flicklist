@@ -41,14 +41,23 @@ class Index(webapp2.RequestHandler):
 
         # TODO 1
         # Include another form so the user can "cross off" a movie from their list.
-
+       remove_form = """
+       <form action="/add" method="post">
+           <label>
+               I want to remove
+               <input type="text" name="removed_movie"/>
+               to my watchlist.
+           </label>
+           <input type="submit" value="Remove It"/>
+       </form>
+       """
 
         # TODO 4 (Extra Credit)
         # modify your form to use a dropdown (<select>) instead a
         # text box (<input type="text"/>)
 
 
-        content = page_header + edit_header + add_form + page_footer
+        content = page_header + edit_header + add_form + remove_form + page_footer
         self.response.write(content)
 
 
