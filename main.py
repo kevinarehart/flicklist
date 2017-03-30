@@ -1,5 +1,5 @@
 import webapp2
-
+import cgi
 
 # html boilerplate for the top of every page
 page_header = """
@@ -69,14 +69,17 @@ class AddMovie(webapp2.RequestHandler):
     def post(self):
         # look inside the request to figure out what the user typed
         new_movie = self.request.get("new-movie")
-
+        if new_movie != (""):
+            escaped_new_movie = cgi.escape(new_movie)
         # build response content
-        new_movie_element = "<strong>" + new_movie + "</strong>"
-        sentence = new_movie_element + " has been added to your Watchlist!"
-
-        content = page_header + "<p>" + sentence + "</p>" + page_footer
-        self.response.write(content)
-
+            new_movie_element = "<strong>" + new_movie + "</strong>"
+            sentence = new_movie_element + " has been added to your Watchlist!"
+            content = page_header + "<p>" + sentence + "</p>" + page_footer
+            self.response.write(content)
+        else:
+            returned_sentence = "Oops! You forgot to enter a movie..."
+            content = page_header + "<p>" + returned_sentence + "</p>" + page_footer
+            self.response.write(content)
 
 
 class CrossOffMovie(webapp2.RequestHandler):
