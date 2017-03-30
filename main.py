@@ -44,12 +44,7 @@ class Index(webapp2.RequestHandler):
         <form action="/cross-off" method="post">
             <label>
                 I want to cross off
-                <select name="crossed-off-movie"/>
-                    <option value="Star Wars">Star Wars</option>
-                    <option value="Minions">Minions</option>
-                    <option value="Freaky Friday">Freaky Friday</option>
-                    <option value="My Favorite Martian">My Favorite Martian</option>
-                </select>
+                <input type="text" name="crossed-off-movie"/>
                 from my watchlist.
             </label>
             <input type="submit" value="Cross It Off"/>
@@ -89,14 +84,21 @@ class CrossOffMovie(webapp2.RequestHandler):
 
     def post(self):
         # look inside the request to figure out what the user typed
+        #rejected_list = ["Star Wars", "Minions", "Freaky Friday", "My Favorite Martian"]
         crossed_off_movie = self.request.get("crossed-off-movie")
+        rejected_movies = ["Star Wars", "Minions", "Freaky Friday", "My Favorite Martian"]
 
-        # build response content
-        crossed_off_movie_element = "<strike>" + crossed_off_movie + "</strike>"
-        confirmation = crossed_off_movie_element + " has been crossed off your Watchlist."
-
-        content = page_header + "<p>" + confirmation + "</p>" + page_footer
-        self.response.write(content)
+        if crossed_off_movie == rejected_movies:
+            terrible_movie_element = "<strong>" + crossed_off_movie + "</strong>"
+            terrible_movie_confirmation = "Trust me, you don't want to add" + terrible_movie_element + " to your Watchlist."
+            terrible_movie_content = page_header + "<p>" + terrible_movie_confirmation + "</p>" + page_footer
+            self.response.write(terrible_movie_content)
+            # build response content
+        else:
+            crossed_off_movie_element = "<strike>" + crossed_off_movie + "</strike>"
+            confirmation = crossed_off_movie_element + " has been crossed off your Watchlist."
+            content = page_header + "<p>" + confirmation + "</p>" + page_footer
+            self.response.write(content)
 
 
 app = webapp2.WSGIApplication([
