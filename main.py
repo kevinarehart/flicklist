@@ -90,7 +90,7 @@ class CrossOffMovie(webapp2.RequestHandler):
    def post(self):
        removed_movie = self.request.get("removed-movie")
 
-       removed_movie_element = "<strong>" + removed_movie + "</strong>"
+       removed_movie_element = "<strong>" + "<strike>" + removed_movie + "</strike>" + "</strong>"
        removed_movie_sentence = removed_movie_element + " has been removed from your Watchlist!"
 
        content2 = page_header + "<p>" + removed_movie_sentence + "</p>" + page_footer
