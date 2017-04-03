@@ -107,8 +107,9 @@ class AddMovie(webapp2.RequestHandler):
 
         # TODO 2
         # if the user typed nothing at all, redirect and yell at them
-
-
+        if new_movie == "":
+            error = "Please enter in a movie already!".format(new_movie)
+            self.redirect("/?error=" + error)
         # TODO 3
         # if the user wants to add a terrible movie, redirect and yell at them
 
