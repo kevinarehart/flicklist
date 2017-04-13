@@ -1,7 +1,5 @@
 import webapp2, cgi, jinja2, os, re
 from google.appengine.ext import db
-import hashutils
-
 
 # set up jinja
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
@@ -61,14 +59,19 @@ class Handler(webapp2.RequestHandler):
         """ Returns the value associated with a name in the user's cookie,
             or returns None, if no value was found or the value is not valid
         """
+
+        # TODO - Make this secure
+
         cookie_val = self.request.cookies.get(name)
         if cookie_val:
-            return hashutils.check_secure_val(cookie_val)
+            return cookie_val
 
     def set_secure_cookie(self, name, val):
         """ Adds a secure name-value pair cookie to the response """
-        cookie_val = hashutils.make_secure_val(val)
-        self.response.headers.add_header('Set-Cookie', '%s=%s; Path=/' % (name, cookie_val))
+
+        # TODO - Make this secure
+
+        self.response.headers.add_header('Set-Cookie', '%s=%s; Path=/' % (name, val))
 
     def initialize(self, *a, **kw):
         """ Any subclass of webapp2.RequestHandler can implement a method called 'initialize'
@@ -225,7 +228,7 @@ class Login(Handler):
         user = self.get_user_by_name(submitted_username)
         if not user:
             self.render_login_form(error = "Invalid username")
-        elif not hashutils.valid_pw(submitted_username, submitted_password, user.pw_hash):
+        elif submitted_password != user.pw_hash:
             self.render_login_form(error = "Invalid password")
         else:
             self.login_user(user)
@@ -296,8 +299,10 @@ class Register(Handler):
             has_error = True
         elif (username and password and verify):
             # create new user object
-            pw_hash = hashutils.make_pw_hash(username, password)
-            user = User(username=username, pw_hash=pw_hash)
+
+            # TODO - hash password
+
+            user = User(username=username, pw_hash=password)
             user.put()
 
             self.login_user(user)
