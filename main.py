@@ -142,12 +142,13 @@ class MovieRatings(Handler):
 
         # TODO 2
         # retreive the movie entity whose id is movie_id
-        movie = None # type something else instead of None
+        movie = Movie.get_by_id( int(movie_id) ) # type something else instead of None
 
         if movie and rating:
             # TODO 3
             # update the movie's rating property and save it to the database
-
+            movie.rating = rating
+            movie.put()
 
             # render confirmation
             t = jinja_env.get_template("rating-confirmation.html")
