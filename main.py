@@ -13,6 +13,11 @@ terrible_movies = [
     "Nine Lives"
 ]
 
+allowed_routes = [
+    "/login",
+    "/register"
+]
+
 class User(db.Model):
     """ Represents a user on our site """
     username = db.StringProperty(required = True)
@@ -42,6 +47,31 @@ class Handler(webapp2.RequestHandler):
         user = db.GqlQuery("SELECT * from User WHERE username = '%s'" % username)
         if user:
             return user.get()
+
+    def read_cookie(self, name):
+        val = self.request.cookies.get(name)
+        if val:
+            return val
+
+    def set_cookie(self, name, val):
+        self.response.headers.add('Set-Cookie', '%s=%s; Path=/' % (name, val))
+
+    def login_user(self, user):
+        user_id = user.key().id()
+        self.set_cookie('user_id', str(user_id))
+
+    def logout_user(self):
+        self.set_cookie('user_id', '')
+
+    def initialize(self, *a, **kw):
+        webapp2.RequestHandler.initialize(self, *a, **kw)
+
+        user_id = self.read_cookie('user_id')
+
+        if user_id:
+            self.user = User.get_by_id(int(user_id))
+        elif self.request.path not in allowed_routes:
+            self.redirect('/login')
 
 
 class Index(Handler):
@@ -180,9 +210,15 @@ class Login(Handler):
         elif submitted_password != user.password:
             self.render_login_form(error = "Invalid password")
         else:
+            self.login_user(user)
             self.redirect("/?message=Welcome " + user.username + "!")
             return
 
+class Logout(Handler):
+
+    def get(self):
+        self.logout_user()
+        self.redirect('/login')
 
 class Register(Handler):
 
@@ -267,5 +303,6 @@ app = webapp2.WSGIApplication([
     ('/watched-it', WatchedMovie),
     ('/ratings', MovieRatings),
     ('/login', Login),
+    ('/logout', Logout),
     ('/register', Register)
 ], debug=True)
