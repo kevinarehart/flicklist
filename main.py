@@ -85,11 +85,8 @@ class Index(Handler):
     def get(self):
         """ Display the homepage (the list of unwatched movies) """
 
-        # TODO 1
-        # We only want the Movies belonging to the current user
-        # Modify the query below.
-        # Instead of a GqlQuery, use an O.R.M. method like MovieRatings.get
-        unwatched_movies = db.GqlQuery("SELECT * FROM Movie WHERE watched = False")
+        query = Movie.all().filter("owner", self.user).filter("watched", False)
+        unwatched_movies = query.run()
 
         t = jinja_env.get_template("frontpage.html")
         content = t.render(
@@ -206,13 +203,8 @@ class RecentlyWatchedMovies(Handler):
         # get the first 20 results
         recently_watched_movies = query.fetch(limit = 20)
 
-        # TODO 3
-        # Replace the code below with code that renders the 'recently-watched.html' template
-        # Don't forget to pass recently_watched_movies over to your template.
-        content = ""
-        for movie in recently_watched_movies:
-            content += movie.title + ", "
-
+        t = jinja_env.get_template("recently-watched.html")
+        content = t.render(movies = recently_watched_movies)
         self.response.write(content)
 
 class Login(Handler):
@@ -329,11 +321,7 @@ app = webapp2.WSGIApplication([
     ('/add', AddMovie),
     ('/watched-it', WatchedMovie),
     ('/ratings', MovieRatings),
-
-    # TODO 2
-    # include another route for recently watched movies
-
-
+    ('/recently-watched', RecentlyWatchedMovies),
     ('/login', Login),
     ('/logout', Logout),
     ('/register', Register)
