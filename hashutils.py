@@ -18,7 +18,8 @@ def make_pw_hash(name, pw, salt = None):
 
 def valid_pw(name, pw, h):
     salt = h.split(',')[1]
-    return h == make_pw_hash(name, pw, salt)
+    test_hash = make_pw_hash(name, pw, salt)
+    return h == test_hash
 
 SECRET = 'czUv86iAN9GXA3MT'
 def hash_str(s):
