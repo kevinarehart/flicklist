@@ -1,6 +1,7 @@
 import webapp2, cgi, jinja2, os, re
 from google.appengine.ext import db
 from datetime import datetime
+import hashutils
 
 # set up jinja
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
@@ -54,10 +55,11 @@ class Handler(webapp2.RequestHandler):
     def read_cookie(self, name):
         val = self.request.cookies.get(name)
         if val:
-            return val
+            return hashutils.check_secure_val(val)
 
     def set_cookie(self, name, val):
-        self.response.headers.add('Set-Cookie', '%s=%s; Path=/' % (name, val))
+        cookie_val = hashutils.make_secure_val(val)
+        self.response.headers.add('Set-Cookie', '%s=%s; Path=/' % (name, cookie_val))
 
     def login_user(self, user):
         user_id = user.key().id()
@@ -74,7 +76,8 @@ class Handler(webapp2.RequestHandler):
         if user_id:
             self.user = User.get_by_id(int(user_id))
         elif self.request.path not in allowed_routes:
-            self.redirect('/login')
+            self.user = None
+            return self.redirect('/login')
 
 
 class Index(Handler):
@@ -226,7 +229,7 @@ class Login(Handler):
         user = self.get_user_by_name(submitted_username)
         if not user:
             self.render_login_form(error = "Invalid username")
-        elif submitted_password != user.password:
+        elif not hashutils.valid_pw(submitted_username, submitted_password, user.password):
             self.render_login_form(error = "Invalid password")
         else:
             self.login_user(user)
@@ -293,7 +296,8 @@ class Register(Handler):
             has_error = True
         elif (username and password and verify):
             # create new user object
-            user = User(username=username, password=password)
+            pw_hash = hashutils.make_pw_hash(username, password)
+            user = User(username=username, password=pw_hash)
             user.put()
         else:
             has_error = True
