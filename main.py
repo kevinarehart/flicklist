@@ -33,6 +33,7 @@ class Movie(db.Model):
     datetime_watched = db.DateTimeProperty()
     rating = db.StringProperty()
     owner = db.ReferenceProperty(User, required = True)
+    watchdate = db.DateTimeProperty()
 
 
 class Handler(webapp2.RequestHandler):
@@ -44,6 +45,11 @@ class Handler(webapp2.RequestHandler):
         """ Sends an HTTP error code and a generic "oops!" message to the client. """
         self.error(error_code)
         self.response.write("Oops! Something went wrong.")
+
+    def get_user_by_id(self):
+        id = self.read_cookie("user_id")
+        loggedInUser = User.get_by_id(int(id))
+        return loggedInUser
 
     def get_user_by_name(self, username):
         """ Given a username, try to fetch the user from the database """
@@ -85,10 +91,6 @@ class Index(Handler):
     def get(self):
         """ Display the homepage (the list of unwatched movies) """
 
-        # TODO 1
-        # We only want the Movies belonging to the current user
-        # Modify the query below.
-        # Instead of a GqlQuery, use an O.R.M. method like MovieRatings.get
         unwatched_movies = db.GqlQuery("SELECT * FROM Movie WHERE watched = False")
 
         t = jinja_env.get_template("frontpage.html")
@@ -124,8 +126,10 @@ class AddMovie(Handler):
         # 'escape' the user's input so that if they typed HTML, it doesn't mess up our site
         new_movie_title_escaped = cgi.escape(new_movie_title, quote=True)
 
+
+        loggedInUser = User.get_by_id(int(id))
         # construct a movie object for the new movie
-        movie = Movie(title = new_movie_title_escaped, owner = self.user)
+        movie = Movie(title = new_movie_title_escaped, owner = loggedInUser)
         movie.put()
 
         # render the confirmation message
@@ -151,7 +155,7 @@ class WatchedMovie(Handler):
 
         # update the movie object to say the user watched it at this date in time
         watched_movie.watched = True
-        watched_movie.datetime_watched = datetime.now()
+        watched_movie.datetime_watched = datetime.datetime.now()
         watched_movie.put()
 
         # render confirmation page
@@ -167,8 +171,8 @@ class MovieRatings(Handler):
     def get(self):
         """ Show a list of the movies the user has already watched """
 
-        query = Movie.all().filter("owner", self.user).filter("watched", True)
-        watched_movies = query.run()
+        q = Movie.all().filter("owner", self.get_user_by_id()).filter("watched = ", True)
+        watched_movies = q.run()
 
         t = jinja_env.get_template("ratings.html")
         content = t.render(movies = watched_movies)
